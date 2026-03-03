@@ -73,11 +73,14 @@ export default function App() {
     fetchSchedules();
   }, []);
 
-  const API_URL = import.meta.env.VITE_API_URL || '';
-
   const fetchStudents = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/students`);
+      const response = await fetch('/api/students');
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        throw new Error(`Expected JSON but got ${contentType}. Body: ${text.substring(0, 100)}...`);
+      }
       const data = await response.json();
       setStudents(data);
     } catch (error) {
@@ -89,7 +92,12 @@ export default function App() {
 
   const fetchSchedules = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/schedules`);
+      const response = await fetch('/api/schedules');
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        throw new Error(`Expected JSON but got ${contentType}. Body: ${text.substring(0, 100)}...`);
+      }
       const data = await response.json();
       setSchedules(data);
     } catch (error) {
@@ -100,7 +108,7 @@ export default function App() {
   const handleAddStudent = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL}/api/students`, {
+      const response = await fetch('/api/students', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newStudent)
@@ -119,7 +127,7 @@ export default function App() {
     e.preventDefault();
     try {
       const dateTime = new Date(`${newSchedule.date}T${newSchedule.time}`).toISOString();
-      const response = await fetch(`${API_URL}/api/schedules`, {
+      const response = await fetch('/api/schedules', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -140,7 +148,7 @@ export default function App() {
 
   const handleDeleteSchedule = async (id: number) => {
     try {
-      const response = await fetch(`${API_URL}/api/schedules/${id}`, {
+      const response = await fetch(`/api/schedules/${id}`, {
         method: 'DELETE'
       });
       if (response.ok) {

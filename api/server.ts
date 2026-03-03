@@ -1,28 +1,44 @@
+import "dotenv/config";
+process.stdout.write("SERVER.TS LOADED\n");
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import cors from "cors";
 
-const prisma = new PrismaClient();
-
 async function startServer() {
+  console.log("Starting API Server...");
+  let prisma: PrismaClient;
+  try {
+    prisma = new PrismaClient();
+    console.log("Prisma Client initialized");
+  } catch (e) {
+    console.error("CRITICAL: Failed to initialize Prisma Client:", e);
+    process.exit(1);
+  }
+  
   const app = express();
   const PORT = process.env.PORT || 3001;
 
   app.use(cors({
-    origin: process.env.APP_URL,
+    origin: true,
     credentials: true
   }));
   app.use(express.json());
 
   // API Routes
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", env: process.env.NODE_ENV, time: new Date().toISOString() });
+  });
+
   app.get("/api/students", async (req, res) => {
+    console.log("GET /api/students");
     try {
       const students = await prisma.student.findMany({
         orderBy: { created_at: 'desc' }
       });
       res.json(students);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch students" });
+      console.error("Prisma Error (students):", error);
+      res.status(500).json({ error: "Failed to fetch students", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -40,6 +56,7 @@ async function startServer() {
       });
       res.status(201).json(newStudent);
     } catch (error) {
+      console.error("Prisma Error (create student):", error);
       res.status(500).json({ error: "Failed to create student" });
     }
   });
@@ -51,6 +68,7 @@ async function startServer() {
       });
       res.status(204).send();
     } catch (error) {
+      console.error("Prisma Error (delete student):", error);
       res.status(500).json({ error: "Failed to delete student" });
     }
   });
@@ -64,6 +82,7 @@ async function startServer() {
       });
       res.json(schedules);
     } catch (error) {
+      console.error("Prisma Error (schedules):", error);
       res.status(500).json({ error: "Failed to fetch schedules" });
     }
   });
@@ -107,8 +126,9 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`API Server running on http://localhost:${PORT}`);
+  const host = "0.0.0.0";
+  app.listen(Number(PORT), host, () => {
+    process.stdout.write(`API Server is listening on http://${host}:${PORT}\n`);
   });
 }
 
