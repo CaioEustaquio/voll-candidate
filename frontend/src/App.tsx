@@ -52,9 +52,11 @@ export default function App() {
     fetchStudents();
   }, []);
 
+  const API_URL = import.meta.env.VITE_API_URL || '';
+
   const fetchStudents = async () => {
     try {
-      const response = await fetch('/api/students');
+      const response = await fetch(`${API_URL}/api/students`);
       const data = await response.json();
       setStudents(data);
     } catch (error) {
@@ -67,7 +69,7 @@ export default function App() {
   const handleAddStudent = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/students', {
+      const response = await fetch(`${API_URL}/api/students`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newStudent)
