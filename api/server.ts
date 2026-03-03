@@ -55,6 +55,48 @@ async function startServer() {
     }
   });
 
+  // Schedule Routes
+  app.get("/api/schedules", async (req, res) => {
+    try {
+      const schedules = await prisma.schedule.findMany({
+        include: { student: true },
+        orderBy: { dateTime: 'asc' }
+      });
+      res.json(schedules);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch schedules" });
+    }
+  });
+
+  app.post("/api/schedules", async (req, res) => {
+    const { studentId, dateTime, notes } = req.body;
+    try {
+      const newSchedule = await prisma.schedule.create({
+        data: {
+          studentId: parseInt(studentId),
+          dateTime: new Date(dateTime),
+          notes,
+          status: 'Agendado'
+        },
+        include: { student: true }
+      });
+      res.status(201).json(newSchedule);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create schedule" });
+    }
+  });
+
+  app.delete("/api/schedules/:id", async (req, res) => {
+    try {
+      await prisma.schedule.delete({
+        where: { id: parseInt(req.params.id) }
+      });
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete schedule" });
+    }
+  });
+
   // Serve static files in production
   if (process.env.NODE_ENV === "production") {
     const path = await import("path");
