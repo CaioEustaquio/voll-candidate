@@ -1,14 +1,12 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import { PrismaClient } from "@prisma/client";
-import path from "path";
 import cors from "cors";
 
 const prisma = new PrismaClient();
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3001;
 
   app.use(cors({
     origin: process.env.APP_URL,
@@ -57,23 +55,18 @@ async function startServer() {
     }
   });
 
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      root: path.join(process.cwd(), "frontend"),
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    app.use(express.static(path.join(process.cwd(), "frontend", "dist")));
+  // Serve static files in production
+  if (process.env.NODE_ENV === "production") {
+    const path = await import("path");
+    const frontendDist = path.join(process.cwd(), "frontend", "dist");
+    app.use(express.static(frontendDist));
     app.get("*", (req, res) => {
-      res.sendFile(path.join(process.cwd(), "frontend", "dist", "index.html"));
+      res.sendFile(path.join(frontendDist, "index.html"));
     });
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`VOLL Candidate running on http://localhost:${PORT}`);
+    console.log(`API Server running on http://localhost:${PORT}`);
   });
 }
 

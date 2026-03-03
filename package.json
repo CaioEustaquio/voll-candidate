@@ -4,18 +4,19 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx api/server.ts",
+    "dev": "concurrently \"tsx api/server.ts\" \"npm run dev --prefix frontend\"",
     "build": "vite build frontend",
     "preview": "vite preview frontend",
     "clean": "rm -rf frontend/dist",
     "lint": "tsc --noEmit -p frontend/tsconfig.json",
-    "start": "node api/server.ts"
+    "start": "NODE_ENV=production PORT=3000 node api/server.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
     "@prisma/client": "^6.4.1",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.2.1",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
