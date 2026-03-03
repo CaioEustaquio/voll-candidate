@@ -68,6 +68,8 @@ export default function App() {
     notes: ''
   });
 
+  const API_URL = import.meta.env.VITE_API_URL || '';
+
   useEffect(() => {
     fetchStudents();
     fetchSchedules();
@@ -75,7 +77,7 @@ export default function App() {
 
   const fetchStudents = async () => {
     try {
-      const response = await fetch('/api/students');
+      const response = await fetch(`${API_URL}/api/students`);
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         const text = await response.text();
@@ -92,7 +94,7 @@ export default function App() {
 
   const fetchSchedules = async () => {
     try {
-      const response = await fetch('/api/schedules');
+      const response = await fetch(`${API_URL}/api/schedules`);
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         const text = await response.text();
@@ -108,7 +110,7 @@ export default function App() {
   const handleAddStudent = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/students', {
+      const response = await fetch(`${API_URL}/api/students`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newStudent)
@@ -127,7 +129,7 @@ export default function App() {
     e.preventDefault();
     try {
       const dateTime = new Date(`${newSchedule.date}T${newSchedule.time}`).toISOString();
-      const response = await fetch('/api/schedules', {
+      const response = await fetch(`${API_URL}/api/schedules`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
