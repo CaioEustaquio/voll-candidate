@@ -8,8 +8,27 @@ async function startServer() {
   console.log("Starting API Server...");
   let prisma: PrismaClient;
   try {
-    prisma = new PrismaClient();
-    const dbUrl = process.env.DATABASE_URL || "";
+    let dbUrl = process.env.DATABASE_URL || "";
+    
+    if (!dbUrl) {
+      console.error("ERROR: DATABASE_URL is not defined in environment variables.");
+    }
+
+    // Auto-fix for Supabase Pooler (port 6543)
+    if (dbUrl.includes(":6543") && !dbUrl.includes("pgbouncer=true")) {
+      dbUrl += (dbUrl.includes("?") ? "&" : "?") + "pgbouncer=true";
+      process.env.DATABASE_URL = dbUrl;
+      console.log("Detected Supabase Pooler port 6543. Appended ?pgbouncer=true to DATABASE_URL");
+    }
+
+    prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: dbUrl
+        }
+      }
+    });
+    
     const host = dbUrl.split("@")[1] || "unknown host";
     console.log(`Prisma Client initialized. Target host: ${host.split("/")[0]}`);
   } catch (e) {
