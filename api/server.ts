@@ -11,8 +11,8 @@ async function startServer() {
     prisma = new PrismaClient();
     console.log("Prisma Client initialized");
   } catch (e) {
-    console.error("CRITICAL: Failed to initialize Prisma Client:", e);
-    process.exit(1);
+    console.error("Failed to initialize Prisma Client:", e);
+    // Don't exit, let the server start so we can see errors in routes
   }
   
   const app = express();

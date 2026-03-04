@@ -71,6 +71,10 @@ export default function App() {
   const API_URL = import.meta.env.VITE_API_URL || '';
 
   useEffect(() => {
+    fetch(`${API_URL}/api/health`)
+      .then(res => res.json())
+      .then(data => console.log('API Health:', data))
+      .catch(err => console.error('API Health Check Failed:', err));
     fetchStudents();
     fetchSchedules();
   }, []);
@@ -150,7 +154,7 @@ export default function App() {
 
   const handleDeleteSchedule = async (id: number) => {
     try {
-      const response = await fetch(`/api/schedules/${id}`, {
+      const response = await fetch(`${API_URL}/api/schedules/${id}`, {
         method: 'DELETE'
       });
       if (response.ok) {

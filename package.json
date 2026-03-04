@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix api\" \"vite frontend\"",
+    "dev": "concurrently \"node --no-warnings --loader tsx api/server.ts\" \"vite frontend\"",
     "build": "vite build frontend",
     "preview": "vite preview frontend",
     "clean": "rm -rf frontend/dist",
