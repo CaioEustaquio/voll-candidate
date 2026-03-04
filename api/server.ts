@@ -137,6 +137,48 @@ async function startServer() {
     }
   });
 
+  // Transaction Routes
+  app.get("/api/transactions", async (req, res) => {
+    try {
+      const transactions = await prisma.transaction.findMany({
+        orderBy: { dueDate: 'desc' }
+      });
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch transactions" });
+    }
+  });
+
+  app.post("/api/transactions", async (req, res) => {
+    const { description, amount, type, category, dueDate, status } = req.body;
+    try {
+      const newTransaction = await prisma.transaction.create({
+        data: {
+          description,
+          amount: parseFloat(amount),
+          type,
+          category,
+          dueDate: new Date(dueDate),
+          status: status || 'Pendente'
+        }
+      });
+      res.status(201).json(newTransaction);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create transaction" });
+    }
+  });
+
+  app.delete("/api/transactions/:id", async (req, res) => {
+    try {
+      await prisma.transaction.delete({
+        where: { id: parseInt(req.params.id) }
+      });
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete transaction" });
+    }
+  });
+
   // Serve static files in production
   if (process.env.NODE_ENV === "production") {
     const path = await import("path");
