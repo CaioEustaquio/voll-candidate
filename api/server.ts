@@ -9,7 +9,9 @@ async function startServer() {
   let prisma: PrismaClient;
   try {
     prisma = new PrismaClient();
-    console.log("Prisma Client initialized");
+    const dbUrl = process.env.DATABASE_URL || "";
+    const host = dbUrl.split("@")[1] || "unknown host";
+    console.log(`Prisma Client initialized. Target host: ${host.split("/")[0]}`);
   } catch (e) {
     console.error("Failed to initialize Prisma Client:", e);
     // Don't exit, let the server start so we can see errors in routes
